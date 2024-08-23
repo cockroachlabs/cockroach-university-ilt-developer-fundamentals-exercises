@@ -11,18 +11,19 @@
     <name>Cockroach University - ILT Developer Fundamentals - Exercises</name>
 
     <modules>
-        <module>day3/exercise04/challenge</module>
-        <module>day3/exercise05/challenge</module>
-        <module>day3/exercise07/challenge</module>
-        <module>day3/exercise07/solution</module>
-        <module>day3/exercise08/challenge</module>
-        <module>day3/exercise08/solution</module>
-        <module>day3/exercise09/challenge</module>
-        <module>day3/exercise09/solution</module>
-        <module>day3/exercise10/challenge</module>
-        <module>day3/exercise10/solution</module>
-        <module>day3/exercise11/challenge</module>
-        <module>day3/exercise11/solution</module>
+        <module>day4/exercise04/challenge</module>
+        <module>day4/exercise05/challenge</module>
+        <module>day4/exercise07/challenge</module>
+        <module>day4/exercise07/solution</module>
+        <module>day4/exercise08/challenge</module>
+        <module>day4/exercise08/solution</module>
+        <module>day4/exercise09/challenge</module>
+        <module>day4/exercise09/solution</module>
+        <module>day4/exercise10/challenge</module>
+        <module>day4/exercise10/solution</module>
+        <module>day4/exercise11/challenge</module>
+        <module>day4/exercise11/solution</module>
+        <module>day4/exercise12</module>
     </modules>
 
     <properties>
