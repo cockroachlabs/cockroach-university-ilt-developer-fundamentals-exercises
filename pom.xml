@@ -23,6 +23,7 @@
         <module>day3/exercise10/solution</module>
         <module>day3/exercise11/challenge</module>
         <module>day3/exercise11/solution</module>
+        <module>day3/exercise12</module>
     </modules>
 
     <properties>

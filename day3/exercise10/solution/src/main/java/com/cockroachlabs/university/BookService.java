@@ -70,13 +70,6 @@ class BookService {
 	// Generate random collection of books and authors
 	//
 
-	private static final List<String> OPENING = List.of( //
-			"Understanding", //
-			"Mastering", //
-			"Getting Going With", //
-			"Introduction to" //
-	);
-
 	private List<Book> generateNewBooks(int numOfNewBooks) {
 		return Stream.generate(() -> new Book(createTitle(), createAuthor())) //
 				.limit(numOfNewBooks) //
@@ -84,6 +77,13 @@ class BookService {
 	}
 
 	private static final Random randomGenerator = new Random();
+
+	private static final List<String> OPENING = List.of( //
+			"Understanding", //
+			"Mastering", //
+			"Getting Going With", //
+			"Introduction to" //
+	);
 
 	private static final List<String> TECH = List.of(" Spring", " Jakarta EE", " Python", " Go", " C++", " Rust");
 
