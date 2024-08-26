@@ -21,6 +21,8 @@
         <module>day3/exercise09/solution</module>
         <module>day3/exercise10/challenge</module>
         <module>day3/exercise10/solution</module>
+        <module>day3/exercise11/challenge</module>
+        <module>day3/exercise11/solution</module>
     </modules>
 
     <properties>
