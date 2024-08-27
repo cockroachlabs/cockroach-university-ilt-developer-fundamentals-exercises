@@ -16,7 +16,7 @@ public class BooklyApplication {
 	CommandLineRunner run(BookService bookService) {
 		return args -> {
 			bookService.clearOutOldBooks();
-			bookService.loadUpBooks(100000);
+			bookService.loadUpBooks(50000);
 		};
 	}
 }

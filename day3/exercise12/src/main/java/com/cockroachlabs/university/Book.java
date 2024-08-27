@@ -1,7 +1,6 @@
 package com.cockroachlabs.university;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 class Book {
@@ -18,20 +17,20 @@ class Book {
 
 	private LocalDate publishDate;
 
-	private String review;
+	private byte[] cover;
 
-	Book(UUID bookId, String title, String author, Float price, String format, LocalDate publishDate, String review) {
+	Book(UUID bookId, String title, String author, Float price, String format, LocalDate publishDate, byte[] cover) {
 		this.bookId = bookId;
 		this.title = title;
 		this.author = author;
 		this.price = price;
 		this.format = format;
 		this.publishDate = publishDate;
-		this.review = review;
+		this.cover = cover;
 	}
 
-	Book(String title, String author, String format, String review) {
-		this(null, title, author, null, format, null, review);
+	Book(String title, String author, String format, byte[] cover) {
+		this(null, title, author, null, format, null, cover);
 	}
 
 	public UUID getBookId() {
@@ -82,35 +81,12 @@ class Book {
 		this.publishDate = publishDate;
 	}
 
-	public String getReview() {
-		return review;
+	public byte[] getCover() {
+		return cover;
 	}
 
-	public void setReview(String review) {
-		this.review = review;
+	public void setCover(byte[] cover) {
+		this.cover = cover;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		Book book = (Book) o;
-		return Objects.equals(bookId, book.bookId) && Objects.equals(title, book.title)
-				&& Objects.equals(author, book.author) && Objects.equals(price, book.price)
-				&& Objects.equals(format, book.format) && Objects.equals(publishDate, book.publishDate)
-				&& Objects.equals(review, book.review);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(bookId, title, author, price, format, publishDate, review);
-	}
-
-	@Override
-	public String toString() {
-		return "Book{" + "bookId=" + bookId + ", title='" + title + '\'' + ", author='" + author + '\'' + ", price=" + price
-				+ ", format='" + format + '\'' + ", publishDate=" + publishDate + ", review='" + review + '\'' + '}';
-	}
 }
