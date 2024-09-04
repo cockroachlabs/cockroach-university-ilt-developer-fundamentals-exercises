@@ -27,6 +27,7 @@ node_modules/
 # Logs
 logs/
 *.log
+*.err
 npm-debug.log*
 
 # Runtime data
@@ -37,6 +38,10 @@ pids/
 
 # Output directories
 public/js/app.js.map
+
+# node.js
+node/
+
 
 # Dependency directories
 node_modules/
