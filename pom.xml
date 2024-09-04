@@ -11,6 +11,7 @@
     <name>Cockroach University - ILT Developer Fundamentals - Exercises</name>
 
     <modules>
+        <module>day2/query_tuning</module>
         <module>day3/exercise04/challenge</module>
         <module>day3/exercise05/challenge</module>
         <module>day3/exercise07/challenge</module>
