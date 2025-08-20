@@ -1,0 +1,12 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Query to check the survival goal directly from SHOW DATABASES
+survival_goal=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT survival_goal FROM [SHOW DATABASES] WHERE database_name = 'movr_rides'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$survival_goal" != "region" ]]; then
+    fail-message "REGION survival goal not set on movr_rides database"
+fi
+
+echo "Exercise 04 completed successfully!"
+

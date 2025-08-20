@@ -1,0 +1,18 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Check if users table exists and has regional by row locality
+table_locality=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT locality FROM [SHOW TABLES FROM movr_users] WHERE table_name = 'users'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$table_locality" != 'REGIONALBYROW' ]]; then
+    fail-message "users table not configured for REGIONAL BY ROW"
+fi
+
+# Verify that there are users in different regions
+user_count=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT COUNT(*) FROM movr_users.users" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$user_count" -lt "3" ]]; then
+    fail-message "Not enough user data loaded"
+fi
+
+echo "Exercise 07 completed successfully!"

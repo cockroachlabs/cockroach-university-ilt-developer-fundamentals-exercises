@@ -1,0 +1,18 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+echo "BEGIN EXERCISE 02 SETUP"
+
+# Change to the directory with the git repo
+/bin/set-workdir /root/university-multi-region-course-app-exercises/
+
+cd ~/university-multi-region-course-app-exercises/exercises/
+    
+./load_exercise.sh 02
+
+cd ~/university-multi-region-course-app-exercises/exercises/movr/cockroach
+
+./init_db.sh "postgresql://root:pass@haproxy:26257/defaultdb?sslmode=require"
+
+echo "COMPLETED EXERCISE 02 SETUP"
+

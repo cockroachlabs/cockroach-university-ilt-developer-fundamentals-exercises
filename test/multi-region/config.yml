@@ -1,0 +1,80 @@
+version: "3"
+virtualmachines:
+- name: ilt-lab-vm
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node1
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node2
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node3
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node4
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node5
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node6
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node7
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node8
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: node9
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+- name: haproxy
+  image: ubuntu-os-cloud/ubuntu-2204-lts
+  shell: /bin/bash
+  environment:
+    HOME: /root
+    SHELL: /usr/bin/bash
+  machine_type: n1-standard-2
+

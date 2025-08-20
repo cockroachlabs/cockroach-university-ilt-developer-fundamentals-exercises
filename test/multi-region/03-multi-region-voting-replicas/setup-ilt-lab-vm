@@ -1,0 +1,10 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+echo "BEGIN EXERCISE 03 SETUP"
+
+# Change to the directory with the docker-compose file
+/bin/set-workdir /root/university-multi-region-course-app-exercises/
+
+
+echo "COMPLETED EXERCISE 03 SETUP"

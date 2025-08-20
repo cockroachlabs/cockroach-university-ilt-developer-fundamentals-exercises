@@ -1,0 +1,43 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Check if promo_codes table exists and has correct columns
+table_exists=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT count(*) FROM [SHOW TABLES FROM movr_pricing] WHERE table_name = 'promo_codes'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$table_exists" != "1" ]]; then
+    fail-message "promo_codes table not found in movr_pricing database"
+fi
+
+# Check that all required columns exist with correct types
+column_check=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "
+SELECT COUNT(*) FROM [SHOW COLUMNS FROM movr_pricing.promo_codes] 
+WHERE (column_name = 'code' AND data_type = 'STRING') 
+   OR (column_name = 'description' AND data_type = 'STRING')
+   OR (column_name = 'creation_time' AND data_type = 'TIMESTAMPTZ')
+   OR (column_name = 'expiration_time' AND data_type = 'TIMESTAMPTZ')
+   OR (column_name = 'rules' AND data_type = 'JSONB')" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$column_check" != "5" ]]; then
+    fail-message "promo_codes table does not have all required columns with correct types"
+fi
+
+# Check that the table has GLOBAL locality
+table_locality=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT locality FROM [SHOW TABLES FROM movr_pricing] WHERE table_name = 'promo_codes'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$table_locality" != 'GLOBAL' ]]; then
+    fail-message "promo_codes table is not configured as GLOBAL"
+fi
+
+# Verify global_reads is enabled in zone configuration
+global_reads_enabled=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "
+SELECT CASE 
+    WHEN raw_config_sql LIKE '%global_reads = true%' THEN 'true'
+    ELSE 'false'
+END
+FROM [SHOW ZONE CONFIGURATION FOR TABLE movr_pricing.promo_codes]" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$global_reads_enabled" != "true" ]]; then
+    fail-message "global_reads not enabled for promo_codes table"
+fi
+
+echo "Exercise 08 completed successfully!"

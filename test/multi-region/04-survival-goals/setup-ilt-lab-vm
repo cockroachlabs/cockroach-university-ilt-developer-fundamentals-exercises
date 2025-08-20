@@ -1,0 +1,22 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+echo "BEGIN EXERCISE 04 SETUP"
+
+cockroach sql --certs-dir=/root/certs --host=haproxy -e "
+DROP DATABASE IF EXISTS movr_rides CASCADE;
+DROP DATABASE IF EXISTS movr_users CASCADE;
+DROP DATABASE IF EXISTS movr_vehicles CASCADE;
+"
+
+cd ~/university-multi-region-course-app-exercises/exercises/
+    
+./load_exercise.sh 03
+
+cd ~/university-multi-region-course-app-exercises/exercises/movr/cockroach
+
+./init_db.sh "postgresql://root:pass@haproxy:26257/defaultdb?sslmode=require"
+
+/bin/set-workdir /root/university-multi-region-course-app-exercises/
+
+echo "COMPLETED EXERCISE 04 SETUP"

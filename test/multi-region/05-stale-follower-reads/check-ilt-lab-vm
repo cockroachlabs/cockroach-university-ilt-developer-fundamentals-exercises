@@ -1,0 +1,11 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Verify at least one successful follower read query
+query_count=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT count(*) FROM [SHOW STATEMENTS] WHERE query ILIKE '%AS OF SYSTEM TIME follower_read_timestamp()%' AND query ILIKE '%location_history%'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$query_count" == "0" ]]; then
+    fail-message "No follower read queries found for location_history table"
+fi
+
+echo "Exercise 06 completed successfully!"

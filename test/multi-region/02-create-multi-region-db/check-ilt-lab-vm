@@ -1,0 +1,20 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Get the regions from the database
+regions=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SHOW REGIONS FROM DATABASE movr_rides")
+
+# Check for each required region
+if ! echo "$regions" | grep -q "us-east"; then
+   fail-message "us-east region not found in movr_rides database"
+fi
+
+if ! echo "$regions" | grep -q "us-central"; then
+   fail-message "us-central region not found in movr_rides database" 
+fi
+
+if ! echo "$regions" | grep -q "us-west"; then
+   fail-message "us-west region not found in movr_rides database"
+fi
+
+echo "Exercise 02 completed successfully!"

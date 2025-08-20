@@ -1,0 +1,4 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+echo "COMPLETED EXERCISE 07 SOLUTION"

@@ -1,0 +1,23 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Get database information 
+db_info=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT database_name, primary_region, regions FROM [SHOW DATABASES] WHERE database_name LIKE 'movr%'")
+
+# For each MovR database
+for db in "movr_rides" "movr_users" "movr_vehicles"; do
+    # Check primary region
+    if ! echo "$db_info" | grep "$db" | grep -q "us-east"; then
+        fail-message "$db missing primary region us-east"
+    fi
+    
+    # Check for presence of each region
+    db_line=$(echo "$db_info" | grep "$db")
+    if ! echo "$db_line" | grep -q "us-east" || \
+       ! echo "$db_line" | grep -q "us-central" || \
+       ! echo "$db_line" | grep -q "us-west"; then
+        fail-message "$db missing one or more regions"
+    fi
+done
+
+echo "Exercise 03 completed successfully!"

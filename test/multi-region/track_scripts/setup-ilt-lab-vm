@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# This set line ensures that all failures will cause the script to error and exit
+set -euxo pipefail
+
+# Wait for the Instruqt host bootstrap to finish
+until [ -f /opt/instruqt/bootstrap/host-bootstrap-completed ]
+do
+    sleep 1
+done
+
+CRDB_VERSION=24.1.8
+
+DEBIAN_FRONTEND=noninteractive apt-get -y update
+DEBIAN_FRONTEND=noninteractive apt-get -y install unzip jq wget htop socat 
+
+# Install CockroachDB on client machine
+echo Installing CockroachDB on client
+wget -qO- https://binaries.cockroachdb.com/cockroach-v${CRDB_VERSION}.linux-amd64.tgz | tar xvz && sudo cp cockroach-v${CRDB_VERSION}.linux-amd64/cockroach /usr/local/bin/
+
+# Define node machine names and install CockroachDB on each
+nodes=("node1" "node2" "node3" "node4" "node5" "node6" "node7" "node8" "node9")
+
+
+# Add all known hosts
+ssh-keyscan -H haproxy >> ~/.ssh/known_hosts
+
+for node in "${nodes[@]}"; do
+    ssh-keyscan -H ${node} >> ~/.ssh/known_hosts
+done
+
+# Declare associative array for node name to IP mapping
+declare -A NODE_IP_ADDRESS
+
+# Populate node IP addresses
+for node in "${nodes[@]}"; do
+    # Get IP address for each node and store in associative array
+    NODE_IP_ADDRESS[$node]=$(ssh ${node} "hostname -I | awk '{print \$1}'")
+    
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to get IP address for $node"
+        exit 1
+    fi
+done
+
+HAPROXY_IP=$(ssh haproxy "hostname -I | awk '{print \$1}'")
+
+# Install HAProxy on the HAProxy node
+ssh haproxy "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update && sudo DEBIAN_FRONTEND=noninteractive apt-get -y install haproxy"
+
+# Create secure client
+echo "Secure the client machine"
+
+echo "Create cert directories"
+rm -rf /root/certs /root/key-directory
+mkdir -p /root/certs /root/key-directory
+chmod 700 /root/certs /root/key-directory
+
+echo "Create CA"
+cockroach cert create-ca \
+ --certs-dir=/root/certs \
+ --ca-key=/root/key-directory/ca.key \
+ --allow-ca-key-reuse
+
+# Create certificates for each node
+for node in "${nodes[@]}"; do
+  echo "Create node certificate for ${node}"
+  cockroach cert create-node \
+    "${NODE_IP_ADDRESS[$node]}" \
+    "${node}" \
+    localhost \
+    127.0.0.1 \
+    haproxy \
+    "${HAPROXY_IP}" \
+    --certs-dir=/root/certs \
+    --ca-key=/root/key-directory/ca.key \
+    --overwrite
+
+  echo "Create and secure folders for certs on ${node}"
+  ssh -o StrictHostKeyChecking=no ${node} "sudo rm -rf /root/certs && sudo mkdir -p /root/certs && sudo chmod 700 /root/certs"
+
+  echo "Upload the CA certificate and node certificate and key to the node:" 
+  scp /root/certs/ca.crt /root/certs/node.crt /root/certs/node.key ${node}:/root/certs/
+  
+  # Set proper permissions on the node
+  ssh -o StrictHostKeyChecking=no ${node} "sudo chmod 600 /root/certs/node.* && sudo chmod 644 /root/certs/ca.crt"
+
+  echo "Delete the local copy of the node certificate and key:"
+  rm /root/certs/node.crt /root/certs/node.key
+done
+
+# Create client cert 
+echo "~~~~~~CREATING CLIENT CERT~~~~~~~"
+cockroach cert create-client root --certs-dir=/root/certs --ca-key=/root/key-directory/ca.key
+chmod 600 /root/certs/client.root.*
+
+# Install CockroachDB on each node
+for node in "${nodes[@]}"; do
+  echo "Installing CockroachDB on ${node}"
+  ssh ${node} "wget -qO- https://binaries.cockroachdb.com/cockroach-v${CRDB_VERSION}.linux-amd64.tgz | tar xvz && sudo cp cockroach-v${CRDB_VERSION}.linux-amd64/cockroach /usr/local/bin/"
+done
+
+# Install GitHub CLI
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt -y update
+DEBIAN_FRONTEND=noninteractive apt -y install gh
+
+# Clone the "highly resilient" course repo
+git clone https://github.com/cockroachdb/university-multi-region-course-app-exercises.git
+
+# Clone the "managing latency" course repo
+git clone https://github.com/cockroachdb/university-multi-region-latency-exercises.git
+
+echo "export PS1='\W$ ' " >> ~/.bashrc
+# echo "su ubuntu " >> ~/.bashrc

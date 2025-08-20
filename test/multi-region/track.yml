@@ -1,0 +1,33 @@
+slug: multi-region-github-integration-test
+id: rrgpvycyyiv5
+title: GitHub Integration Test - Multi-Region Architecture & Fault Tolerance
+description: This comprehensive course teaches you the essential concepts and practical
+  skills for building, configuring, and optimizing multi-region databases using CockroachDB.
+  From initial cluster setup to advanced performance optimization techniques, you'll
+  gain hands-on experience with the critical components of geographically distributed
+  database deployments.
+icon: ./assets/CockroachLabs_Logo-Mark_Full-Color-Dark-BG.svg
+tags:
+- no-ci
+- prod
+- training-team
+owner: cockroachlabs
+developers:
+- ramki@cockroachlabs.com
+- greg.turnquist@cockroachlabs.com
+- felipe.gutierrezcruz@cockroachlabs.com
+- nathan.zamecnik@cockroachlabs.com
+skipping_enabled: true
+idle_timeout: 3600
+timelimit: 36000
+lab_config:
+  sidebar_enabled: true
+  feedback_recap_enabled: true
+  feedback_tab_enabled: false
+  loadingMessages: true
+  override_challenge_layout: false
+  hideStopButton: false
+  default_layout: AssignmentRight
+  default_layout_sidebar_size: 33
+checksum: "12102951342115470707"
+enhanced_loading: false

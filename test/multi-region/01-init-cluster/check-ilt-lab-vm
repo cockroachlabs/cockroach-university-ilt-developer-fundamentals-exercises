@@ -1,0 +1,26 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Expected number of nodes in the cluster
+EXPECTED_NODES=9
+
+# Check cluster node status
+node_count=$(cockroach node status --certs-dir=/root/certs --host=node1 --format=tsv | tail -n +2 | wc -l)
+
+# Verify the cluster has the expected number of nodes
+if [ "$node_count" -ne "$EXPECTED_NODES" ]; then
+    fail-message "Cluster not initialized correctly. Expected $EXPECTED_NODES nodes, but found $node_count."
+fi
+
+echo "Cluster initialization check passed with $node_count nodes!"
+
+# Verify all nodes have locality settings
+missing_localities=$(cockroach node status --certs-dir=/root/certs --host=node1 --format=tsv | awk -F'\t' 'NR>1 && $6 == ""')
+
+# If any node is missing a locality, fail the check
+if [ -n "$missing_localities" ]; then
+    fail-message "Some nodes are missing locality settings. Verify the locality configuration."
+fi
+
+echo "All nodes have proper locality settings!"
+echo "Cluster initialization verified successfully!"

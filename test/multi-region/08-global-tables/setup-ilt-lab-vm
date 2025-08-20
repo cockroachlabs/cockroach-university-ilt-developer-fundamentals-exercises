@@ -1,0 +1,24 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+echo "BEGIN EXERCISE 08 SETUP"
+
+/bin/set-workdir /root/university-multi-region-latency-exercises/
+
+cockroach sql --certs-dir=/root/certs --host=haproxy -e "
+DROP DATABASE IF EXISTS movr_rides CASCADE;
+DROP DATABASE IF EXISTS movr_users CASCADE;
+DROP DATABASE IF EXISTS movr_vehicles CASCADE;
+DROP DATABASE IF EXISTS movr_pricing CASCADE;
+"
+
+cd ~/university-multi-region-latency-exercises/exercises/
+
+# Exercise 08 corresponds with exercise 04 in the latency course.    
+./load_exercise.sh 04
+
+cd ~/university-multi-region-latency-exercises/exercises/movr/cockroach
+
+./init_db.sh "postgresql://root:pass@haproxy:26257/defaultdb?sslmode=require"
+
+echo "COMPLETED EXERCISE 08 SETUP"

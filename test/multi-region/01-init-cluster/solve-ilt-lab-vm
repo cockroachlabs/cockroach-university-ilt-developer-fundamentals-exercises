@@ -1,0 +1,93 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Environment setup
+export US_EAST_NODES=("node1" "node2" "node3")
+export US_CENTRAL_NODES=("node4" "node5" "node6")
+export US_WEST_NODES=("node7" "node8" "node9")
+export ZONES=("a" "b" "c")
+
+# Function to start nodes in a specific region
+start_nodes() {
+  local nodes=("${!1}")
+  local region="$2"
+  local join_addresses="$3"
+
+  for i in "${!nodes[@]}"; do
+    node="${nodes[i]}"
+    zone="${ZONES[i]}"
+    ssh -o StrictHostKeyChecking=no ${node} "nohup cockroach start \
+      --certs-dir=/root/certs \
+      --advertise-addr=${node}:26257 \
+      --http-addr=0.0.0.0:8443 \
+      --join=${join_addresses} \
+      --locality=region=${region},zone=${zone} \
+      --cache=.25 \
+      --max-sql-memory=.25 \
+      --background \
+      > /tmp/start_${node}.out 2> /tmp/start_${node}.err < /dev/null"
+  done
+}
+
+# Step 1: Start US East nodes
+start_nodes US_EAST_NODES[@] "us-east" "node1:26257,node2:26257,node3:26257"
+
+sleep 4
+
+# Step 2: Start US Central nodes
+start_nodes US_CENTRAL_NODES[@] "us-central" "node1:26257,node2:26257,node3:26257"
+
+sleep 4
+
+# Step 3: Start US West nodes
+start_nodes US_WEST_NODES[@] "us-west" "node1:26257,node2:26257,node3:26257,node4:26257,node5:26257,node6:26257"
+
+echo "Waiting for all nodes to stabilize..."
+sleep 10
+
+# Step 4: Initializing the cluster
+cockroach init --certs-dir=/root/certs --host=node1:26257
+
+# Step 5: Verify cluster initialization (optional but good practice)
+: <<'END_COMMENT'
+node_count=$(cockroach node status --certs-dir=/root/certs --host=node1 --format=tsv | tail -n +2 | wc -l)
+live_nodes=$(cockroach node status --certs-dir=/root/certs --host=node1 --format=tsv | awk -F'\t' '$9 == "true"' | wc -l)
+
+if [ "$node_count" -ne 9 ]; then
+    echo "Error: Expected 9 nodes in the cluster but found $node_count."
+    exit 1
+fi
+
+if [ "$live_nodes" -ne 9 ]; then
+    echo "Error: Expected 9 nodes to be live but found $live_nodes."
+    exit 1
+fi
+END_COMMENT
+
+echo "All 9 nodes are started and live."
+
+# Step 6: Configure HAProxy
+
+# Generate HAProxy configuration file for the 9-node cluster
+cockroach gen haproxy \
+    --certs-dir=/root/certs \
+    --host=node1 \
+    --port=26257 \
+    --out=/tmp/haproxy.cfg
+
+# Transfer HAProxy config to the HAProxy node
+scp -o StrictHostKeyChecking=no /tmp/haproxy.cfg haproxy:/etc/haproxy/haproxy.cfg
+
+# Restart or start HAProxy service on the HAProxy node
+ssh -o StrictHostKeyChecking=no haproxy "sudo systemctl restart haproxy || sudo systemctl start haproxy"
+
+# Give HAproxy a moment to start
+sleep 2
+
+# Create a demo user 
+cockroach sql --certs-dir=/root/certs --host=haproxy --execute $'CREATE USER demo with password \'movr\';'
+
+# Update root user password
+cockroach sql --certs-dir=/root/certs --host=haproxy --execute $'ALTER USER root with password \'pass\';'
+
+echo "HAProxy configured and started successfully!"

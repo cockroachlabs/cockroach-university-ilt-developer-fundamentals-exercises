@@ -1,0 +1,18 @@
+#!/bin/bash +x
+set -euxo pipefail
+
+# Check if vip_rates table exists and has correct regional settings
+vip_table_locality=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT locality FROM [SHOW TABLES FROM movr_pricing] WHERE table_name = 'vip_rates'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$vip_table_locality" != '"REGIONALBYTABLEIN""us-west"""' ]]; then
+    fail-message "vip_rates table not configured with correct locality settings"
+fi
+
+# Check if standard_rates table exists with default settings
+standard_table_exists=$(cockroach sql --certs-dir=/root/certs --host=haproxy --format=csv -e "SELECT count(*) FROM [SHOW TABLES FROM movr_pricing] WHERE table_name = 'standard_rates'" | tail -n +2 | tr -d '[:space:]')
+
+if [[ "$standard_table_exists" != "1" ]]; then
+    fail-message "standard_rates table not found"
+fi
+
+echo "Exercise 05 completed successfully!"
